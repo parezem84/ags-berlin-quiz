@@ -305,7 +305,7 @@
     <div class="progress-bar-wrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
-    <div class="progress-label" id="progressLabel">0 / 10</div>
+    <div class="progress-label" id="progressLabel">0 / 8</div>
   </div>
 </header>
 
@@ -313,7 +313,7 @@
 
   <!-- Single experiment card (swapped out each round) -->
   <div class="exp-card" id="expCard">
-    <div class="card-label" id="cardLabel">Experiment 1 of 10</div>
+    <div class="card-label" id="cardLabel">Experiment 1 of 8</div>
     <div class="card-title" id="cardTitle"></div>
     <div class="card-subtitle" id="cardSubtitle"></div>
     <div class="ab-buttons">
@@ -366,75 +366,62 @@ const GOOGLE_SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
 
 const EXPERIMENTS = [
   {
-    title: "Experiment 1",
-    subtitle: "What were we testing?",  // e.g. "Free trial vs. no trial"
+    title: "More visual + yearly upfront vs. With personalized touch",
+    subtitle: "#1",  // e.g. "Free trial vs. no trial"
     labelA: "Variant A",               // short description of A
     labelB: "Variant B",               // short description of B
     winner: "A"                        // "A" or "B"
   },
   {
-    title: "Experiment 2",
-    subtitle: "What were we testing?",
-    labelA: "Variant A",
-    labelB: "Variant B",
-    winner: "A"
-  },
-  {
-    title: "Experiment 3",
-    subtitle: "What were we testing?",
+    title: "Single-page vs. Multi-page",
+    subtitle: "#2",
     labelA: "Variant A",
     labelB: "Variant B",
     winner: "B"
   },
   {
-    title: "Experiment 4",
-    subtitle: "What were we testing?",
-    labelA: "Variant A",
-    labelB: "Variant B",
-    winner: "A"
-  },
-  {
-    title: "Experiment 5",
-    subtitle: "What were we testing?",
+    title: "No choice vs. Choice",
+    subtitle: "#3",
     labelA: "Variant A",
     labelB: "Variant B",
     winner: "B"
   },
   {
-    title: "Experiment 6",
-    subtitle: "What were we testing?",
-    labelA: "Variant A",
-    labelB: "Variant B",
-    winner: "A"
-  },
-  {
-    title: "Experiment 7",
-    subtitle: "What were we testing?",
+    title: "Monthly-to-yearly price 1:7 vs. 1:4",
+    subtitle: "#4",
     labelA: "Variant A",
     labelB: "Variant B",
     winner: "B"
   },
   {
-    title: "Experiment 8",
-    subtitle: "What were we testing?",
+    title: "Design your trial experience vs. More emotional & yearly + monthly",
+    subtitle: "#5",
     labelA: "Variant A",
     labelB: "Variant B",
     winner: "A"
   },
   {
-    title: "Experiment 9",
-    subtitle: "What were we testing?",
+    title: "2 plans vs. 3 plans",
+    subtitle: "#6",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "A"
+  },
+  {
+    title: "Failed test costs vs. Credibility logos",
+    subtitle: "#7",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "A"
+  },
+  {
+    title: "AI credits present vs. not present",
+    subtitle: "#8",
     labelA: "Variant A",
     labelB: "Variant B",
     winner: "B"
   },
-  {
-    title: "Experiment 10",
-    subtitle: "What were we testing?",
-    labelA: "Variant A",
-    labelB: "Variant B",
-    winner: "A"
-  },
+  
 ];
 
 // ═══════════════════════════════════════════════════════════
