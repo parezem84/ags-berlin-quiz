@@ -527,7 +527,7 @@ async function handleSubmit() {
   EXPERIMENTS.forEach((_, i) => { payload[`exp${i + 1}`] = guesses[i + 1] || ""; });
 
   try {
-    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbzMMEoSn9lee0axvX_b8K0hJsNrptY-iLb4L8k7z748GaouzqsyjqE4H1jivnFaDmafBw/exec") {
+    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_APPS_SCRIPT_URL_HERE") {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
