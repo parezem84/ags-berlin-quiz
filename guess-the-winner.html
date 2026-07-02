@@ -295,6 +295,22 @@
       border-radius: 99px;
       margin: 22px 0 0;
     }
+    .slides-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      border: 2px solid var(--border);
+      border-radius: 99px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .slides-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -353,6 +369,8 @@
     <h2>Guesses submitted!</h2>
     <p>Results will be revealed at the end.<br>Good luck — you might win a prize!</p>
     <div class="score-badge" id="scoreDisplay"></div>
+    <br>
+    <a class="slides-link" href="https://parezem84.github.io/ags-berlin-quiz/2026_ags_berlin_guess_the_winner.pdf" target="_blank">📄 Download the slides</a>
   </div>
 
 </div><!-- /stage -->
