@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess the Winner – AGS Barcelona</title>
+  <style>
+    /* ── EDIT THIS BEFORE THE EVENT ── */
+    :root {
+      --accent: #4EFFC8;
+      --accent-light: #1A3D32;
+      --wrong: #FF6B6B;
+      --bg: #1A1D23;
+      --card: #2D3139;
+      --text: #FFFFFF;
+      --muted: #9BA3AF;
+      --border: #3D4149;
+      --radius: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #2D3139;
+      color: white;
+      text-align: center;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    header h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.3px; }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .progress-bar-wrap {
+      flex: 1;
+      background: rgba(255,255,255,0.15);
+      border-radius: 99px;
+      height: 5px;
+    }
+    .progress-bar {
+      background: var(--accent);
+      height: 5px;
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 700;
+      white-space: nowrap;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* ── Stage ── */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 32px;
+      overflow: hidden;
+    }
+
+    /* ── Experiment card ── */
+    .exp-card {
+      width: 100%;
+      max-width: 460px;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-40px); }
+    }
+    .exp-card.leaving {
+      animation: slideOut 0.25s ease forwards;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+
+    .ab-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .ab-btn {
+      padding: 24px 12px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .ab-btn .letter {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--muted);
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .ab-btn .lbl {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+    .ab-btn:hover {
+      border-color: var(--accent);
+    }
+    .ab-btn:hover .letter,
+    .ab-btn:hover .lbl {
+      color: var(--accent);
+    }
+    .ab-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .ab-btn.selected .letter,
+    .ab-btn.selected .lbl {
+      color: var(--accent);
+    }
+
+    /* ── Continue button ── */
+    .continue-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #1A1D23;
+      font-size: 1rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+    }
+    .continue-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .continue-btn:hover { opacity: 0.88; }
+
+    /* ── Submit screen ── */
+    #submit-screen {
+      display: none;
+      width: 100%;
+      max-width: 460px;
+      animation: slideIn 0.3s ease;
+    }
+    .submit-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .submit-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .submit-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+    }
+    .form-group { margin-bottom: 14px; }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      padding: 13px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, input[type="email"]:focus {
+      border-color: var(--accent);
+    }
+    .warning {
+      font-size: 0.8rem;
+      color: var(--wrong);
+      margin-bottom: 14px;
+      display: none;
+      padding: 10px 12px;
+      background: #3D1A1A;
+      border-radius: 8px;
+    }
+    .warning.visible { display: block; }
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #1A1D23;
+      font-size: 1rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .submit-btn:hover:not(:disabled) { opacity: 0.88; }
+
+    /* ── Thank you ── */
+    #thank-you {
+      display: none;
+      width: 100%;
+      max-width: 460px;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+    }
+    #thank-you .emoji { font-size: 3.5rem; }
+    #thank-you h2 { font-size: 1.4rem; font-weight: 800; margin: 14px 0 8px; }
+    #thank-you p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+    .score-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #1A1D23;
+      font-size: 1.15rem;
+      font-weight: 800;
+      padding: 12px 32px;
+      border-radius: 99px;
+      margin: 22px 0 0;
+    }
+    .slides-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      border: 2px solid var(--border);
+      border-radius: 99px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .slides-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏆 Guess the Winner · AGS Barcelona</h1>
+  <div class="progress-row">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">0 / 8</div>
+  </div>
+</header>
+
+<div class="stage" id="stage">
+
+  <!-- Single experiment card (swapped out each round) -->
+  <div class="exp-card" id="expCard">
+    <div class="card-label" id="cardLabel">Experiment 1 of 8</div>
+    <div class="card-title" id="cardTitle"></div>
+    <div class="card-subtitle" id="cardSubtitle"></div>
+    <div class="ab-buttons">
+      <button class="ab-btn" id="btnA" onclick="pick('A')">
+        <span class="letter">A</span>
+        <span class="lbl" id="labelA"></span>
+      </button>
+      <button class="ab-btn" id="btnB" onclick="pick('B')">
+        <span class="letter">B</span>
+        <span class="lbl" id="labelB"></span>
+      </button>
+    </div>
+    <button class="continue-btn" id="continueBtn" onclick="advance()">Continue →</button>
+  </div>
+
+  <!-- Submit screen (shown after last experiment) -->
+  <div id="submit-screen">
+    <div class="submit-title">Almost there! 🎯</div>
+    <div class="submit-sub">Enter your details to lock in your guesses.</div>
+    <div class="submit-card">
+      <div class="form-group">
+        <label for="nameInput">Your name</label>
+        <input type="text" id="nameInput" placeholder="Jane Smith" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="emailInput">Your email</label>
+        <input type="email" id="emailInput" placeholder="jane@company.com" autocomplete="email" />
+      </div>
+      <div class="warning" id="warningMsg"></div>
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">Submit my guesses</button>
+    </div>
+  </div>
+
+  <!-- Thank you screen -->
+  <div id="thank-you">
+    <div class="emoji">🎉</div>
+    <h2>Guesses submitted!</h2>
+    <p>Results will be revealed at the end.<br>Good luck — you might win a prize!</p>
+    <div class="score-badge" id="scoreDisplay"></div>
+    <br>
+    <a class="slides-link" href="https://parezem84.github.io/ags-berlin-quiz/2026_ags_bcn.pdf" target="_blank">📄 Download the slides</a>
+  </div>
+
+</div><!-- /stage -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  ✏️  EDIT THIS SECTION BEFORE THE EVENT
+// ═══════════════════════════════════════════════════════════
+
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMMEoSn9lee0axvX_b8K0hJsNrptY-iLb4L8k7z748GaouzqsyjqE4H1jivnFaDmafBw/exec";
+
+const EXPERIMENTS = [
+  {
+    title: "More visual + yearly upfront vs. With personalized touch",
+    subtitle: "#1",  // e.g. "Free trial vs. no trial"
+    labelA: "Variant A",               // short description of A
+    labelB: "Variant B",               // short description of B
+    winner: "A"                        // "A" or "B"
+  },
+  {
+    title: "Single-page vs. Multi-page",
+    subtitle: "#2",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "B"
+  },
+  {
+    title: "No choice vs. Choice",
+    subtitle: "#3",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "B"
+  },
+  {
+    title: "Monthly-to-yearly price 1:7 vs. 1:4",
+    subtitle: "#4",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "B"
+  },
+  {
+    title: "Design your trial experience vs. More emotional & yearly + monthly",
+    subtitle: "#5",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "A"
+  },
+  {
+    title: "2 plans vs. 3 plans",
+    subtitle: "#6",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "A"
+  },
+  {
+    title: "Failed test costs vs. Credibility logos",
+    subtitle: "#7",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "A"
+  },
+  {
+    title: "AI credits present vs. not present",
+    subtitle: "#8",
+    labelA: "Variant A",
+    labelB: "Variant B",
+    winner: "B"
+  },
+  
+];
+
+// ═══════════════════════════════════════════════════════════
+//  🔧 APP LOGIC — no need to edit below
+// ═══════════════════════════════════════════════════════════
+
+const guesses = {};
+let current = 0; // 0-indexed
+
+function renderCurrent() {
+  const exp = EXPERIMENTS[current];
+  const num = current + 1;
+  const total = EXPERIMENTS.length;
+
+  document.getElementById("cardLabel").textContent    = `Experiment ${num} of ${total}`;
+  document.getElementById("cardTitle").textContent    = exp.title;
+  document.getElementById("cardSubtitle").textContent = exp.subtitle || "";
+  document.getElementById("labelA").textContent       = exp.labelA;
+  document.getElementById("labelB").textContent       = exp.labelB;
+
+  // Restore previous pick if user somehow navigates back (defensive)
+  const prev = guesses[num];
+  document.getElementById("btnA").classList.toggle("selected", prev === "A");
+  document.getElementById("btnB").classList.toggle("selected", prev === "B");
+
+  const continueBtn = document.getElementById("continueBtn");
+  continueBtn.textContent = num === total ? "Submit guesses →" : "Continue →";
+  continueBtn.classList.toggle("visible", !!prev);
+
+  updateProgress();
+}
+
+function pick(choice) {
+  const num = current + 1;
+  guesses[num] = choice;
+  document.getElementById("btnA").classList.toggle("selected", choice === "A");
+  document.getElementById("btnB").classList.toggle("selected", choice === "B");
+  document.getElementById("continueBtn").classList.add("visible");
+  updateProgress();
+}
+
+function advance() {
+  const card = document.getElementById("expCard");
+
+  // Slide out current card
+  card.classList.add("leaving");
+
+  setTimeout(() => {
+    card.classList.remove("leaving");
+    current++;
+
+    if (current >= EXPERIMENTS.length) {
+      // Show submit screen
+      card.style.display = "none";
+      document.getElementById("submit-screen").style.display = "block";
+      updateProgress();
+    } else {
+      renderCurrent();
+    }
+  }, 250);
+}
+
+function updateProgress() {
+  const answered = Object.keys(guesses).length;
+  const total = EXPERIMENTS.length;
+  const pct = (answered / total) * 100;
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = `${answered} / ${total}`;
+}
+
+function calcScore() {
+  let score = 0;
+  EXPERIMENTS.forEach((exp, i) => {
+    if (guesses[i + 1] === exp.winner) score++;
+  });
+  return score;
+}
+
+async function handleSubmit() {
+  const name  = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const warn  = document.getElementById("warningMsg");
+
+  if (!name || !email) {
+    warn.textContent = "Please enter your name and email.";
+    warn.classList.add("visible");
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    warn.textContent = "Please enter a valid email address.";
+    warn.classList.add("visible");
+    return;
+  }
+  warn.classList.remove("visible");
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  const score = calcScore();
+  const answered = Object.keys(guesses).length;
+  const payload = { name, email, score, total: EXPERIMENTS.length, answered };
+  EXPERIMENTS.forEach((_, i) => { payload[`exp${i + 1}`] = guesses[i + 1] || ""; });
+
+  try {
+    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_APPS_SCRIPT_URL_HERE") {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      console.log("Submission (no script URL set):", payload);
+    }
+    showThankYou(score);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Submit my guesses";
+    warn.textContent = "Something went wrong. Please try again.";
+    warn.classList.add("visible");
+  }
+}
+
+function showThankYou(score) {
+  document.getElementById("submit-screen").style.display = "none";
+  const ty = document.getElementById("thank-you");
+  ty.style.display = "block";
+  document.getElementById("scoreDisplay").textContent =
+    `Your score: ${score} / ${EXPERIMENTS.length}`;
+}
+
+// Init
+renderCurrent();
+</script>
+</body>
+</html>
